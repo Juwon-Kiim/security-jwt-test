@@ -1,6 +1,7 @@
 package com.example.SpringJWT.controller;
 
 import com.example.SpringJWT.dto.JoinDto;
+import com.example.SpringJWT.service.JoinService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
