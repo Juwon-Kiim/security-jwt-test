@@ -3,8 +3,10 @@ package com.example.SpringJWT.jwt;
 import com.example.SpringJWT.dto.CustomUserDetails;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -39,21 +41,45 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        CustomUserDetails principal = (CustomUserDetails) authResult.getPrincipal();
-        String username = principal.getUsername();
+//        CustomUserDetails principal = (CustomUserDetails) authResult.getPrincipal();
+//        String username = principal.getUsername();
+//
+//        Collection<? extends GrantedAuthority> authorities = principal.getAuthorities();
+//        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+//        GrantedAuthority auth = iterator.next();
+//        System.out.println(auth.getAuthority());
+//
+//        String role = auth.getAuthority();
+//        String token = jwtUtil.createJwt(username, role, 60 * 60 * 10L);
+//        response.addHeader("Authorization", "Bearer "+token);
 
-        Collection<? extends GrantedAuthority> authorities = principal.getAuthorities();
+        String username = authResult.getName();
+
+        Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
-        System.out.println(auth.getAuthority());
-
         String role = auth.getAuthority();
-        String token = jwtUtil.createJwt(username, role, 60 * 60 * 10L);
-        response.addHeader("Authorization", "Bearer "+token);
+
+        String access = jwtUtil.createJwt("access", username, role, 600000L);
+        String refresh = jwtUtil.createJwt("refresh", username, role, 86400000L);
+
+        response.setHeader("access", access);
+        response.addCookie(createCookie("refresh", refresh));
+        response.setStatus(HttpStatus.OK.value());
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         response.setStatus(401);
+    }
+
+    private Cookie createCookie(String key, String value){
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60);
+        // cookie.setSecure(true);
+        // cookie.setPath("/");
+        cookie.setHttpOnly(true);
+
+        return cookie;
     }
 }
