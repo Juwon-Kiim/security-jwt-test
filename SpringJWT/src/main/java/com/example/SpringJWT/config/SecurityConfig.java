@@ -3,6 +3,7 @@ package com.example.SpringJWT.config;
 import com.example.SpringJWT.jwt.JwtFilter;
 import com.example.SpringJWT.jwt.JwtUtil;
 import com.example.SpringJWT.jwt.LoginFilter;
+import com.example.SpringJWT.repository.RefreshRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,10 +27,12 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
 
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final RefreshRepository refreshRepository;
 
-    public SecurityConfig(JwtUtil jwtUtil, AuthenticationConfiguration authenticationConfiguration) {
+    public SecurityConfig(JwtUtil jwtUtil, AuthenticationConfiguration authenticationConfiguration, RefreshRepository refreshRepository) {
         this.jwtUtil = jwtUtil;
         this.authenticationConfiguration = authenticationConfiguration;
+        this.refreshRepository = refreshRepository;
     }
 
     @Bean
@@ -72,7 +75,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
         http
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
-                .addFilterAt(new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(new LoginFilter(jwtUtil, authenticationManager(authenticationConfiguration), refreshRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
