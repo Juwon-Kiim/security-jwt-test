@@ -67,7 +67,7 @@ public class ReissueController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    private void addRefreshEntity(String username, String refresh, String expiredMs){
+    private void addRefreshEntity(String username, String refresh, Long expiredMs){
         Date date = new Date(System.currentTimeMillis() + expiredMs);
 
         RefreshEntity refreshEntity = new RefreshEntity();
